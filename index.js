@@ -35,10 +35,18 @@ const scopes = [
 ];
 
 var authorizeURL = spotifyApi.createAuthorizeURL(scopes, state);
+let code = "";
 
 app.get("/", (req, res) => {
   // res.redirect(spotifyApi.createAuthorizeURL(scopes, state));
   res.json({ url: authorizeURL });
+});
+
+app.post("/sendCode/:code", (req, res) => {
+  code = req.params.code;
+  console.log("hi");
+  console.log(code);
+  console.log("hi");
 });
 
 app.get("/callback", async (req, res) => {
@@ -99,7 +107,7 @@ app.get("/getUserPlaylists", async (req, res) => {
 });
 
 app.get("/addToPlaylist/", async (req, res) => {
-  console.log("code: ", code);
+  console.log("code add playlist: ", code);
   spotifyApi.authorizationCodeGrant(code).then(
     function (data) {
       console.log("The token expires in " + data.body["expires_in"]);
