@@ -1,12 +1,15 @@
 import express from "express";
 import SpotifyWebApi from "spotify-web-api-node";
 import detectEmotions from "./gvision.js";
+import cors from "cors";
+
 const port = 3000;
 const app = express();
+app.use(cors());
 const spotifyApi = new SpotifyWebApi({
   clientId: "fbaa4ee2ec994d8ab34f78da26fdfde4",
   clientSecret: "292aa991447f4dfb836531d967b38c0c",
-  redirectUri: "http://localhost:3000/callback",
+  redirectUri: "http://localhost:5173/",
 });
 const state = "some-state-of-my-choice";
 const scopes = [
@@ -31,10 +34,11 @@ const scopes = [
   "user-follow-modify",
 ];
 
-var authorizeURL = spotifyApi.createAuthorizeURL(scopes, state, true);
+var authorizeURL = spotifyApi.createAuthorizeURL(scopes, state);
 
 app.get("/", (req, res) => {
-  res.redirect(spotifyApi.createAuthorizeURL(scopes, state));
+  // res.redirect(spotifyApi.createAuthorizeURL(scopes, state));
+  res.json({ url: authorizeURL });
 });
 
 app.get("/callback", async (req, res) => {
@@ -72,7 +76,7 @@ app.get("/getUserDetails", (req, res) => {
   );
 });
 
-app.get("/getUsersPlaylist", async (req, res) => {
+app.get("/getUserPlaylists", async (req, res) => {
   let user = "";
   await spotifyApi.getMe().then(
     function (data) {
@@ -113,7 +117,7 @@ app.get("/emotions", async (req, res) => {
   const emotions = await detectEmotions("happygyal.webp");
   console.log(emotions);
   res.send(emotions);
-})
+});
 
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`);
