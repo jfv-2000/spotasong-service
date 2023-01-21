@@ -31,14 +31,17 @@ const scopes = [
   "user-follow-modify",
 ];
 
-var authorizeURL = spotifyApi.createAuthorizeURL(scopes, state, true);
+var authorizeURL = spotifyApi.createAuthorizeURL(scopes, state);
+
+let code = "";
 
 app.get("/", (req, res) => {
+  // res.send(authorizeURL);
   res.redirect(spotifyApi.createAuthorizeURL(scopes, state));
 });
 
 app.get("/callback", async (req, res) => {
-  const code = req.query.code;
+  code = req.query.code;
 
   console.log("code", code);
 
@@ -65,6 +68,7 @@ app.get("/getUserDetails", (req, res) => {
   spotifyApi.getMe().then(
     function (data) {
       console.log("Some information about the authenticated user", data.body);
+      res.send(data.body);
     },
     function (err) {
       console.log("Something went wrong!", err);
@@ -72,7 +76,7 @@ app.get("/getUserDetails", (req, res) => {
   );
 });
 
-app.get("/getUsersPlaylist", async (req, res) => {
+app.get("/getUserPlaylists", async (req, res) => {
   let user = "";
   await spotifyApi.getMe().then(
     function (data) {
@@ -85,6 +89,7 @@ app.get("/getUsersPlaylist", async (req, res) => {
   spotifyApi.getUserPlaylists(user).then(
     function (data) {
       console.log("Retrieved playlists", data.body);
+      res.send(data.body);
     },
     function (err) {
       console.log("Something went wrong!", err);
@@ -92,28 +97,46 @@ app.get("/getUsersPlaylist", async (req, res) => {
   );
 });
 
-app.get("/addToPlaylist/:playlistId/:trackId", async (req, res) => {
-  // Add tracks to a playlist
-  spotifyApi
-    .addTracksToPlaylist(
-      req.params.playlistId,
-      `spotify:track:${req.params.trackId}`
-    )
-    .then(
-      function (data) {
-        console.log("Added track to playlist!");
-      },
-      function (err) {
-        console.log("Something went wrong!", err);
-      }
-    );
+app.get("/addToPlaylist/", async (req, res) => {
+  console.log("code: ", code);
+  spotifyApi.authorizationCodeGrant(code).then(
+    function (data) {
+      console.log("The token expires in " + data.body["expires_in"]);
+      console.log("The access token is " + data.body["access_token"]);
+      console.log("The refresh token is " + data.body["refresh_token"]);
+
+      // Set the access token on the API object to use it in later calls
+      spotifyApi.setAccessToken(data.body["access_token"]);
+      spotifyApi.setRefreshToken(data.body["refresh_token"]);
+
+      spotifyApi
+        .addTracksToPlaylist(
+          "4YQtx6mcMqRIzBdl3BBodH",
+          [
+            "spotify:track:4iV5W9uYEdYUVa79Axb7Rh",
+            "spotify:track:1301WleyT98MSxVHPZCA6M",
+          ],
+          {
+            position: 10,
+          }
+        )
+        .then(() => {
+          console.log("added to playlist !!!!");
+        });
+    },
+    function (err) {
+      console.log("Something went wrong!", err);
+    }
+  );
+
+  // 4YQtx6mcMqRIzBdl3BBodH
 });
 
 app.get("/emotions", async (req, res) => {
   const emotions = await detectEmotions("happygyal.webp");
   console.log(emotions);
   res.send(emotions);
-})
+});
 
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`);
