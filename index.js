@@ -35,19 +35,10 @@ const scopes = [
 ];
 
 var authorizeURL = spotifyApi.createAuthorizeURL(scopes, state);
-<<<<<<< HEAD
-
-let code = "";
-
-app.get("/", (req, res) => {
-  // res.send(authorizeURL);
-  res.redirect(spotifyApi.createAuthorizeURL(scopes, state));
-=======
 
 app.get("/", (req, res) => {
   // res.redirect(spotifyApi.createAuthorizeURL(scopes, state));
   res.json({ url: authorizeURL });
->>>>>>> dae76f3bfd11ea3c78effbd00f68049f8d9d9b74
 });
 
 app.get("/callback", async (req, res) => {
