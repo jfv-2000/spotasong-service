@@ -26,6 +26,26 @@ spotifyApi.clientCredentialsGrant().then(
   }
 );
 
+app.get("/", (req, res) => {
+  res.send("Hello World!");
+});
+
+app.get("/test", (req, res) => {
+  spotifyApi.getArtistTopTracks("0oSGxfWSnnOXhD2fKuz2Gy", "GB").then((data) => {
+    data.body.tracks.forEach(function (track, index) {
+      console.log(
+        index +
+          1 +
+          ". " +
+          track.name +
+          " (popularity is " +
+          track.popularity +
+          ")"
+      );
+    });
+  });
+});
+
 app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`);
 });
