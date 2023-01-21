@@ -7,43 +7,107 @@ const app = express();
 const spotifyApi = new SpotifyWebApi({
   clientId: "fbaa4ee2ec994d8ab34f78da26fdfde4",
   clientSecret: "292aa991447f4dfb836531d967b38c0c",
+  redirectUri: "http://localhost:3000/callback",
 });
+const state = "some-state-of-my-choice";
+const scopes = [
+  "ugc-image-upload",
+  "user-read-playback-state",
+  "user-modify-playback-state",
+  "user-read-currently-playing",
+  "streaming",
+  "app-remote-control",
+  "user-read-email",
+  "user-read-private",
+  "playlist-read-collaborative",
+  "playlist-modify-public",
+  "playlist-read-private",
+  "playlist-modify-private",
+  "user-library-modify",
+  "user-library-read",
+  "user-top-read",
+  "user-read-playback-position",
+  "user-read-recently-played",
+  "user-follow-read",
+  "user-follow-modify",
+];
 
-// Retrieve an access token
-spotifyApi.clientCredentialsGrant().then(
-  function (data) {
-    console.log("The access token expires in " + data.body["expires_in"]);
-    console.log("The access token is " + data.body["access_token"]);
-
-    // Save the access token so that it's used in future calls
-    spotifyApi.setAccessToken(data.body["access_token"]);
-  },
-  function (err) {
-    console.log(
-      "Something went wrong when retrieving an access token",
-      err.message
-    );
-  }
-);
+var authorizeURL = spotifyApi.createAuthorizeURL(scopes, state, true);
 
 app.get("/", (req, res) => {
-  res.send("Hello World!");
+  res.redirect(spotifyApi.createAuthorizeURL(scopes, state));
 });
 
-app.get("/test", (req, res) => {
-  spotifyApi.getArtistTopTracks("0oSGxfWSnnOXhD2fKuz2Gy", "GB").then((data) => {
-    data.body.tracks.forEach(function (track, index) {
-      console.log(
-        index +
-          1 +
-          ". " +
-          track.name +
-          " (popularity is " +
-          track.popularity +
-          ")"
-      );
-    });
-  });
+app.get("/callback", async (req, res) => {
+  const code = req.query.code;
+
+  console.log("code", code);
+
+  // Retrieve an access token and a refresh token
+  spotifyApi.authorizationCodeGrant(code).then(
+    function (data) {
+      console.log("The token expires in " + data.body["expires_in"]);
+      console.log("The access token is " + data.body["access_token"]);
+      console.log("The refresh token is " + data.body["refresh_token"]);
+
+      // Set the access token on the API object to use it in later calls
+      spotifyApi.setAccessToken(data.body["access_token"]);
+      spotifyApi.setRefreshToken(data.body["refresh_token"]);
+    },
+    function (err) {
+      console.log("Something went wrong!", err);
+    }
+  );
+
+  res.send("test callback");
+});
+
+app.get("/getUserDetails", (req, res) => {
+  spotifyApi.getMe().then(
+    function (data) {
+      console.log("Some information about the authenticated user", data.body);
+    },
+    function (err) {
+      console.log("Something went wrong!", err);
+    }
+  );
+});
+
+app.get("/getUsersPlaylist", async (req, res) => {
+  let user = "";
+  await spotifyApi.getMe().then(
+    function (data) {
+      user = data.body.id;
+    },
+    function (err) {
+      console.log("Something went wrong!", err);
+    }
+  );
+  spotifyApi.getUserPlaylists(user).then(
+    function (data) {
+      console.log("Retrieved playlists", data.body);
+    },
+    function (err) {
+      console.log("Something went wrong!", err);
+    }
+  );
+});
+
+app.get("/addToPlaylist/:playlistId/:trackId", async (req, res) => {
+  // Add tracks to a playlist
+  spotifyApi
+    .addTracksToPlaylist(
+      req.params.playlistId,
+      `spotify:track:${req.params.trackId}`
+    )
+    .then(
+      function (data) {
+        console.log("Added track to playlist!");
+      },
+      function (err) {
+        console.log("Something went wrong!", err);
+      }
+    );
 });
 
 app.listen(port, () => {

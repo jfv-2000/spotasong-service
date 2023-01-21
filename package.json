@@ -22,6 +22,7 @@
     "express": "^4.18.2",
     "node-fetch": "^3.3.0",
     "nodemon": "^2.0.20",
+    "querystring": "^0.2.1",
     "spotify-web-api-node": "^5.0.2"
   }
 }
