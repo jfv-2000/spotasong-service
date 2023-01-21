@@ -1,12 +1,15 @@
 import express from "express";
 import SpotifyWebApi from "spotify-web-api-node";
 import detectEmotions from "./gvision.js";
+import cors from "cors";
+
 const port = 3000;
 const app = express();
+app.use(cors());
 const spotifyApi = new SpotifyWebApi({
   clientId: "fbaa4ee2ec994d8ab34f78da26fdfde4",
   clientSecret: "292aa991447f4dfb836531d967b38c0c",
-  redirectUri: "http://localhost:3000/callback",
+  redirectUri: "http://localhost:5173/",
 });
 const state = "some-state-of-my-choice";
 const scopes = [
@@ -32,12 +35,19 @@ const scopes = [
 ];
 
 var authorizeURL = spotifyApi.createAuthorizeURL(scopes, state);
+<<<<<<< HEAD
 
 let code = "";
 
 app.get("/", (req, res) => {
   // res.send(authorizeURL);
   res.redirect(spotifyApi.createAuthorizeURL(scopes, state));
+=======
+
+app.get("/", (req, res) => {
+  // res.redirect(spotifyApi.createAuthorizeURL(scopes, state));
+  res.json({ url: authorizeURL });
+>>>>>>> dae76f3bfd11ea3c78effbd00f68049f8d9d9b74
 });
 
 app.get("/callback", async (req, res) => {
