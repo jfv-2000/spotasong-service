@@ -18,14 +18,23 @@
 //   title: Cloud Vision Face Detection
 //   description: Identify faces in an image using the Cloud Vision API.
 //   usage: node vision-face-detection.js <fileName>
-
-function main(fileName) {
+import vision from "@google-cloud/vision";
+export default async function detectEmotions(fileName) {
   // [START vision_face_detection]
   // Imports the Google Cloud client library
-  const vision = require('@google-cloud/vision');
+  //const vision = require('@google-cloud/vision');
 
   // Creates a client
   const client = new vision.ImageAnnotatorClient();
+
+  function initEmotions() {
+    return {
+      joy: "",
+      anger: "",
+      sorrow: "",
+      surprise: ""
+    };
+  }
 
   async function detectFaces() {
     /**
@@ -35,16 +44,30 @@ function main(fileName) {
 
     const [result] = await client.faceDetection(fileName);
     const faces = result.faceAnnotations;
-    console.log('Faces:');
+    let emotions = initEmotions();
+
     faces.forEach((face, i) => {
-      console.log(`  Face #${i + 1}:`);
-      console.log(`    Joy: ${face.joyLikelihood}`);
-      console.log(`    Anger: ${face.angerLikelihood}`);
-      console.log(`    Sorrow: ${face.sorrowLikelihood}`);
-      console.log(`    Surprise: ${face.surpriseLikelihood}`);
+      emotions.joy = face.joyLikelihood;
+      emotions.anger = face.angerLikelihood;
+      emotions.sorrow = face.sorrowLikelihood;
+      emotions.surprise = face.surpriseLikelihood;
     });
+    
+    let output = "{";
+    Object.keys(emotions).forEach((emotion, index) => {
+      if ((emotions[emotion] === "VERY_LIKELY" || emotions[emotion] === "LIKELY") && (emotion === "joy" || emotion === "surprise")) {
+        output += `"${emotion}": "${emotions[emotion]}",`;
+      }
+    })
+    
+    if (output.charAt(output.length - 1) === ",") {
+      output = output.substring(0, output.length - 1);
+    }
+
+    output += "}";
+    return await JSON.parse(output);
   }
-  detectFaces();
+  return await detectFaces();
   // [END vision_face_detection]
 }
 
@@ -53,4 +76,4 @@ process.on('unhandledRejection', err => {
   process.exitCode = 1;
 });
 
-main(...process.argv.slice(2));
+// main(...process.argv.slice(2));
