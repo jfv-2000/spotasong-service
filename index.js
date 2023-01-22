@@ -14,8 +14,8 @@ app.use(cors());
 const spotifyApi = new SpotifyWebApi({
   clientId: "fbaa4ee2ec994d8ab34f78da26fdfde4",
   clientSecret: "292aa991447f4dfb836531d967b38c0c",
-  // redirectUri: "http://localhost:5173/",
-  redirectUri: "http://localhost:3000/callback",
+  redirectUri: "http://localhost:5173/",
+  // redirectUri: "http://localhost:3000/callback",
 });
 const state = "some-state-of-my-choice";
 const scopes = [
@@ -47,8 +47,8 @@ var authorizeURL = spotifyApi.createAuthorizeURL(scopes, state);
 let code = "";
 
 app.get("/", (req, res) => {
-  res.redirect(spotifyApi.createAuthorizeURL(scopes, state));
-  // res.json({ url: authorizeURL });
+  // res.redirect(spotifyApi.createAuthorizeURL(scopes, state));
+  res.json({ url: authorizeURL });
 });
 
 app.get("/callback", async (req, res) => {
