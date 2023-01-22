@@ -23,6 +23,7 @@
     "@google-cloud/vision": "^3.1.0",
     "cors": "^2.8.5",
     "express": "^4.18.2",
+    "image-data-uri": "^2.0.1",
     "node-fetch": "^3.3.0",
     "nodemon": "^2.0.20",
     "querystring": "^0.2.1",
