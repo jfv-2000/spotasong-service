@@ -42,17 +42,8 @@ app.get("/", (req, res) => {
   res.json({ url: authorizeURL });
 });
 
-app.post("/sendCode/:code", (req, res) => {
-  code = req.params.code;
-  console.log("hi");
-  console.log(code);
-  console.log("hi");
-});
-
 app.get("/callback", async (req, res) => {
   code = req.query.code;
-
-  console.log("code", code);
 
   // Retrieve an access token and a refresh token
   spotifyApi.authorizationCodeGrant(code).then(
