@@ -5,8 +5,10 @@ import ImageDataURI from "image-data-uri";
 import SpotifyWebApi from "spotify-web-api-node";
 import detectEmotions from "./gvision.js";
 
-const port = 3000;
+import http from "http";
+
 const app = express();
+const server = http.createServer(app);
 app.use(express.json());
 
 app.use(cors());
@@ -222,6 +224,7 @@ app.post("/emotions", async (req, res) => {
   res.send(emotions);
 });
 
-app.listen(port, () => {
+const port = process.env.PORT || 3000;
+server.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`);
 });
