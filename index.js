@@ -4,7 +4,6 @@ import fs from "fs";
 import ImageDataURI from "image-data-uri";
 import SpotifyWebApi from "spotify-web-api-node";
 import detectEmotions from "./gvision.js";
-import cors from "cors";
 
 const port = 3000;
 const app = express();
@@ -128,6 +127,7 @@ app.get("/getRecByPlaylist/:playlistId", async (req, res) => {
   await spotifyApi.getPlaylist(req.params.playlistId).then(async (data) => {
     numberOfTracks = data.body.tracks.total / 5;
     let allRecs = [];
+    let allTracks = [];
     for (let i = 0; i < numberOfTracks; i++) {
       await spotifyApi
         .getPlaylistTracks(req.params.playlistId, {
@@ -138,8 +138,10 @@ app.get("/getRecByPlaylist/:playlistId", async (req, res) => {
         .then(
           // data containing 5 tracks
           async function (data) {
+            data.body.items.forEach((value) => {
+              allTracks.push(value.track);
+            });
             const seed_tracks = data.body.items.map((item) => item.track.id);
-            // console.log("seed tracks: ", seed_tracks);
             await spotifyApi
               .getRecommendations({
                 seed_tracks: seed_tracks,
@@ -160,11 +162,59 @@ app.get("/getRecByPlaylist/:playlistId", async (req, res) => {
           }
         );
     }
-    // const filteredRecs = allRecs.filter(
-    //   (rec) => rec.
-    // );
+    allRecs = allRecs.filter((val) => !allTracks.includes(val));
     res.json(allRecs);
   });
+});
+
+app.get("/getPlaylistTracks/:playlistId", async (req, res) => {
+  let numberOfTracks = 0;
+
+  await spotifyApi.getPlaylist(req.params.playlistId).then(async (data) => {
+    numberOfTracks = data.body.tracks.total / 5;
+    let allTracks = [];
+    for (let i = 0; i < numberOfTracks; i++) {
+      await spotifyApi
+        .getPlaylistTracks(req.params.playlistId, {
+          offset: i * 5,
+          limit: 5,
+          fields: "items",
+        })
+        .then(
+          // data containing 5 tracks
+          async function (data) {
+            allTracks = allTracks.concat(data.body.items);
+            console.log(allTracks.length);
+          },
+          function (err) {
+            console.log("Something went wrong!", err);
+          }
+        );
+    }
+    res.json(allTracks);
+  });
+});
+
+app.get("/getTop100", async (req, res) => {
+  /* Get a User’s Top Tracks*/
+  let topTracks = [];
+  for (let i = 0; i < 2; i++) {
+    console.log("i: ", i);
+    await spotifyApi
+      .getMyTopTracks({
+        offset: i * 49,
+        limit: 49,
+      })
+      .then(
+        function (data) {
+          topTracks = topTracks.concat(data.body.items);
+        },
+        function (err) {
+          console.log("Something went wrong!", err);
+        }
+      );
+  }
+  res.json(topTracks);
 });
 
 app.post("/emotions", async (req, res) => {
