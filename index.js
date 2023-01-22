@@ -4,12 +4,10 @@ import fs from "fs";
 import ImageDataURI from "image-data-uri";
 import SpotifyWebApi from "spotify-web-api-node";
 import detectEmotions from "./gvision.js";
-import cors from "cors";
 
 const port = 3000;
 const app = express();
 app.use(express.json());
-app.use(express.urlencoded());
 
 app.use(cors());
 const spotifyApi = new SpotifyWebApi({
@@ -171,19 +169,17 @@ app.post("/emotions", async (req, res) => {
   const FILENAME = "./screenshot.png";
   const image = await req.body.imgSrc.toString();
   await ImageDataURI.outputFile(image, FILENAME);
+  let emotions;
 
   try {
-    const emotions = await detectEmotions(FILENAME);
-    console.log(emotions);
+    emotions = await detectEmotions(FILENAME);
   } catch (err) {
     console.error(err);
   } finally {
     fs.unlinkSync(FILENAME);
     console.log("File removed: ", FILENAME);
   }
-
-  // res.send(emotions);
-  res.send("helo");
+  res.send(emotions);
 });
 
 app.listen(port, () => {
