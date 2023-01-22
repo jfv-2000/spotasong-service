@@ -4,7 +4,6 @@ import fs from "fs";
 import ImageDataURI from "image-data-uri";
 import SpotifyWebApi from "spotify-web-api-node";
 import detectEmotions from "./gvision.js";
-
 import http from "http";
 
 const app = express();
@@ -40,6 +39,9 @@ const scopes = [
   "user-follow-read",
   "user-follow-modify",
 ];
+
+const GOOGLE_APPLICATION_CREDENTIALS =
+  "./skillful-hull-375510-7d9b2d7e37e0.json";
 
 var authorizeURL = spotifyApi.createAuthorizeURL(scopes, state);
 let code = "";
@@ -210,7 +212,7 @@ app.get("/getTop100", async (req, res) => {
 });
 
 app.post("/emotions", async (req, res) => {
-  const FILENAME = "./screenshot.png";
+  const FILENAME = "./screenshot.jpeg";
   const image = await req.body.imgSrc;
   await ImageDataURI.outputFile(image.toString(), FILENAME);
   let emotions;
@@ -224,6 +226,7 @@ app.post("/emotions", async (req, res) => {
     console.log("File removed: ", FILENAME);
   }
   res.send(emotions);
+  // res.redirect("/callback");
 });
 
 const port = process.env.PORT || 3000;
