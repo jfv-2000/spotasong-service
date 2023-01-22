@@ -46,8 +46,6 @@ app.get("/", (req, res) => {
 app.get("/callback", async (req, res) => {
   code = req.query.code;
 
-  console.log("code", code);
-
   // Retrieve an access token and a refresh token
   spotifyApi.authorizationCodeGrant(code).then(
     function (data) {
