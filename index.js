@@ -1,7 +1,7 @@
+import cors from "cors";
 import express from "express";
 import SpotifyWebApi from "spotify-web-api-node";
 import detectEmotions from "./gvision.js";
-import cors from "cors";
 
 
 const port = 3000;
