@@ -3,18 +3,17 @@ import SpotifyWebApi from "spotify-web-api-node";
 import detectEmotions from "./gvision.js";
 import cors from "cors";
 
-
 const port = 3000;
 const app = express();
-app.use(express.json())
+app.use(express.json());
 app.use(express.urlencoded());
 
 app.use(cors());
 const spotifyApi = new SpotifyWebApi({
   clientId: "fbaa4ee2ec994d8ab34f78da26fdfde4",
   clientSecret: "292aa991447f4dfb836531d967b38c0c",
-  redirectUri: "http://localhost:5173/",
-  // redirectUri: "http://localhost:3000/callback",
+  // redirectUri: "http://localhost:5173/",
+  redirectUri: "http://localhost:3000/callback",
 });
 const state = "some-state-of-my-choice";
 const scopes = [
@@ -43,8 +42,8 @@ var authorizeURL = spotifyApi.createAuthorizeURL(scopes, state);
 let code = "";
 
 app.get("/", (req, res) => {
-  // res.redirect(spotifyApi.createAuthorizeURL(scopes, state));
-  res.json({ url: authorizeURL });
+  res.redirect(spotifyApi.createAuthorizeURL(scopes, state));
+  // res.json({ url: authorizeURL });
 });
 
 app.get("/callback", async (req, res) => {
@@ -106,26 +105,63 @@ app.get("/getUserPlaylists", async (req, res) => {
   );
 });
 
-app.get("/addToPlaylist", async (req, res) => {
+app.get("/addToPlaylist/:playlistId/:trackId", async (req, res) => {
   console.log("code add playlist: ", code);
 
-  spotifyApi
-    .addTracksToPlaylist("4YQtx6mcMqRIzBdl3BBodH", [
-      "spotify:track:4iV5W9uYEdYUVa79Axb7Rh",
-      "spotify:track:1301WleyT98MSxVHPZCA6M",
-    ])
-    .then(
-      function (data) {
-        console.log("Added tracks to playlist!");
-      },
-      function (err) {
-        console.log("Something went wrong!", err);
-      }
-    );
-  // 4YQtx6mcMqRIzBdl3BBodH
+  spotifyApi.addTracksToPlaylist(req.params.playlistId, [`${trackId}`]).then(
+    function (data) {
+      console.log("Added tracks to playlist!");
+    },
+    function (err) {
+      console.log("Something went wrong!", err);
+    }
+  );
 });
 
-app.get("/getRec");
+app.get("/getRecByPlaylist/:playlistId", async (req, res) => {
+  // Get tracks in a playlist
+  let numberOfTracks = 0;
+
+  await spotifyApi.getPlaylist(req.params.playlistId).then(async (data) => {
+    numberOfTracks = data.body.tracks.total / 5;
+    let allRecs = [];
+    for (let i = 0; i < numberOfTracks; i++) {
+      await spotifyApi
+        .getPlaylistTracks(req.params.playlistId, {
+          offset: i * 5,
+          limit: 5,
+          fields: "items",
+        })
+        .then(
+          // data containing 5 tracks
+          async function (data) {
+            const seed_tracks = data.body.items.map((item) => item.track.id);
+            // console.log("seed tracks: ", seed_tracks);
+            await spotifyApi
+              .getRecommendations({
+                seed_tracks: seed_tracks,
+                limit: 5,
+              })
+              .then(
+                async function (data) {
+                  const recs = data.body.tracks;
+                  allRecs = allRecs.concat(recs);
+                },
+                function (err) {
+                  console.log("Something went wrong!", err);
+                }
+              );
+          },
+          function (err) {
+            console.log("Something went wrong!", err);
+          }
+        );
+    }
+    console.log("all recs: ", allRecs);
+    res.json(allRecs);
+    // console.log(data.body.tracks.total);
+  });
+});
 
 // app.get("/emotions", async (req, res) => {
 //   const emotions = await detectEmotions("happygyal.webp");
@@ -133,14 +169,13 @@ app.get("/getRec");
 //   res.send(emotions);
 // });
 
-
 app.post("/emotions", async (req, res) => {
   // console.log(req.body);
   const emotions = await detectEmotions(req.body.imgSrc);
   console.log(emotions);
 
   // res.send(emotions);
-  res.send("helo")
+  res.send("helo");
 });
 
 app.listen(port, () => {
