@@ -10,6 +10,7 @@ const spotifyApi = new SpotifyWebApi({
   clientId: "fbaa4ee2ec994d8ab34f78da26fdfde4",
   clientSecret: "292aa991447f4dfb836531d967b38c0c",
   redirectUri: "http://localhost:5173/",
+  // redirectUri: "http://localhost:3000/callback",
 });
 const state = "some-state-of-my-choice";
 const scopes = [
@@ -40,10 +41,6 @@ let code = "";
 app.get("/", (req, res) => {
   // res.redirect(spotifyApi.createAuthorizeURL(scopes, state));
   res.json({ url: authorizeURL });
-});
-
-app.post("/sendCode/:code", (req, res) => {
-  code = req.params.code;
 });
 
 app.get("/callback", async (req, res) => {
@@ -103,40 +100,26 @@ app.get("/getUserPlaylists", async (req, res) => {
   );
 });
 
-app.get("/addToPlaylist/", async (req, res) => {
+app.get("/addToPlaylist", async (req, res) => {
   console.log("code add playlist: ", code);
-  spotifyApi.authorizationCodeGrant(code).then(
-    function (data) {
-      console.log("The token expires in " + data.body["expires_in"]);
-      console.log("The access token is " + data.body["access_token"]);
-      console.log("The refresh token is " + data.body["refresh_token"]);
 
-      // Set the access token on the API object to use it in later calls
-      spotifyApi.setAccessToken(data.body["access_token"]);
-      spotifyApi.setRefreshToken(data.body["refresh_token"]);
-
-      spotifyApi
-        .addTracksToPlaylist(
-          "4YQtx6mcMqRIzBdl3BBodH",
-          [
-            "spotify:track:4iV5W9uYEdYUVa79Axb7Rh",
-            "spotify:track:1301WleyT98MSxVHPZCA6M",
-          ],
-          {
-            position: 10,
-          }
-        )
-        .then(() => {
-          console.log("added to playlist !!!!");
-        });
-    },
-    function (err) {
-      console.log("Something went wrong!", err);
-    }
-  );
-
+  spotifyApi
+    .addTracksToPlaylist("4YQtx6mcMqRIzBdl3BBodH", [
+      "spotify:track:4iV5W9uYEdYUVa79Axb7Rh",
+      "spotify:track:1301WleyT98MSxVHPZCA6M",
+    ])
+    .then(
+      function (data) {
+        console.log("Added tracks to playlist!");
+      },
+      function (err) {
+        console.log("Something went wrong!", err);
+      }
+    );
   // 4YQtx6mcMqRIzBdl3BBodH
 });
+
+app.get("/getRec");
 
 app.get("/emotions", async (req, res) => {
   const emotions = await detectEmotions("happygyal.webp");
