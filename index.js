@@ -102,14 +102,16 @@ app.get("/getUserPlaylists", async (req, res) => {
 });
 
 app.get("/addToPlaylist/:playlistId/:trackId", async (req, res) => {
-  spotifyApi.addTracksToPlaylist(req.params.playlistId, [`${trackId}`]).then(
-    function (data) {
-      console.log("Added tracks to playlist!");
-    },
-    function (err) {
-      console.log("Something went wrong!", err);
-    }
-  );
+  spotifyApi
+    .addTracksToPlaylist(req.params.playlistId, [`${req.params.trackId}`])
+    .then(
+      function (data) {
+        console.log("Added tracks to playlist!");
+      },
+      function (err) {
+        console.log("Something went wrong!", err);
+      }
+    );
 });
 
 app.get("/getRecByPlaylist/:playlistId", async (req, res) => {
