@@ -3,8 +3,12 @@ import SpotifyWebApi from "spotify-web-api-node";
 import detectEmotions from "./gvision.js";
 import cors from "cors";
 
+
 const port = 3000;
 const app = express();
+app.use(express.json())
+app.use(express.urlencoded());
+
 app.use(cors());
 const spotifyApi = new SpotifyWebApi({
   clientId: "fbaa4ee2ec994d8ab34f78da26fdfde4",
@@ -123,10 +127,20 @@ app.get("/addToPlaylist", async (req, res) => {
 
 app.get("/getRec");
 
-app.get("/emotions", async (req, res) => {
-  const emotions = await detectEmotions("happygyal.webp");
+// app.get("/emotions", async (req, res) => {
+//   const emotions = await detectEmotions("happygyal.webp");
+//   console.log(emotions);
+//   res.send(emotions);
+// });
+
+
+app.post("/emotions", async (req, res) => {
+  // console.log(req.body);
+  const emotions = await detectEmotions(req.body.imgSrc);
   console.log(emotions);
-  res.send(emotions);
+
+  // res.send(emotions);
+  res.send("helo")
 });
 
 app.listen(port, () => {
