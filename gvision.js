@@ -36,12 +36,30 @@ export default async function detectEmotions(fileName) {
     };
   }
 
-  async function detectFaces() {
-    /**
-     * TODO(developer): Uncomment the following line before running the sample.
-     */
-    // const fileName = 'Local image file, e.g. /path/to/image.png';
+  function generateOutput(emotions) {
+    let output = "{";
+    Object.keys(emotions).forEach((emotion) => {
+      const acceptedLikelihoods = ["VERY_LIKELY", "LIKELY", "POSSIBLE"];
+      const acceptedEmotions = ["joy", "surprise"];
 
+      if (acceptedLikelihoods.includes(emotions[emotion]) && acceptedEmotions.includes(emotion)) {
+        output += `"${emotion}": "${emotions[emotion]}",`;
+      }
+    })
+    
+    if (output.length == 1) {
+      output += `"notInterested": "true",`;
+    }
+
+    if (output.charAt(output.length - 1) === ",") {
+      output = output.substring(0, output.length - 1);
+    }
+
+    output += "}";
+    return JSON.parse(output);
+  }
+
+  async function detectFaces() {
     const [result] = await client.faceDetection(fileName);
     const faces = result.faceAnnotations;
     let emotions = initEmotions();
@@ -53,22 +71,7 @@ export default async function detectEmotions(fileName) {
       emotions.surprise = face.surpriseLikelihood;
     });
     
-    let output = "{";
-    Object.keys(emotions).forEach((emotion, index) => {
-      const acceptedLikelihoods = ["VERY_LIKELY", "LIKELY", "POSSIBLE"];
-      const acceptedEmotions = ["joy", "surprise"];
-
-      if (acceptedLikelihoods.includes(emotions[emotion]) && acceptedEmotions.includes(emotion)) {
-        output += `"${emotion}": "${emotions[emotion]}",`;
-      }
-    })
-    
-    if (output.charAt(output.length - 1) === ",") {
-      output = output.substring(0, output.length - 1);
-    }
-
-    output += "}";
-    return await JSON.parse(output);
+    return generateOutput(emotions);
   }
   return await detectFaces();
   // [END vision_face_detection]
