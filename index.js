@@ -211,8 +211,8 @@ app.get("/getTop100", async (req, res) => {
 
 app.post("/emotions", async (req, res) => {
   const FILENAME = "./screenshot.png";
-  const image = await req.body.imgSrc.toString();
-  await ImageDataURI.outputFile(image, FILENAME);
+  const image = await req.body.imgSrc;
+  await ImageDataURI.outputFile(image.toString(), FILENAME);
   let emotions;
 
   try {
