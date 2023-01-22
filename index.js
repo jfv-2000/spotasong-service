@@ -14,7 +14,7 @@ app.use(cors());
 const spotifyApi = new SpotifyWebApi({
   clientId: "fbaa4ee2ec994d8ab34f78da26fdfde4",
   clientSecret: "292aa991447f4dfb836531d967b38c0c",
-  redirectUri: "http://localhost:5173/",
+  redirectUri: "https://spot-a-song.onrender.com/",
   // redirectUri: "http://localhost:3000/callback",
 });
 const state = "some-state-of-my-choice";
