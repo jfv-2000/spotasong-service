@@ -1,4 +1,7 @@
+import cors from "cors";
 import express from "express";
+import fs from "fs";
+import ImageDataURI from "image-data-uri";
 import SpotifyWebApi from "spotify-web-api-node";
 import detectEmotions from "./gvision.js";
 import cors from "cors";
@@ -163,16 +166,20 @@ app.get("/getRecByPlaylist/:playlistId", async (req, res) => {
   });
 });
 
-// app.get("/emotions", async (req, res) => {
-//   const emotions = await detectEmotions("happygyal.webp");
-//   console.log(emotions);
-//   res.send(emotions);
-// });
-
 app.post("/emotions", async (req, res) => {
-  // console.log(req.body);
-  const emotions = await detectEmotions(req.body.imgSrc);
-  console.log(emotions);
+  const FILENAME = "./screenshot.png";
+  const image = await req.body.imgSrc.toString();
+  await ImageDataURI.outputFile(image, FILENAME);
+
+  try {
+    const emotions = await detectEmotions(FILENAME);
+    console.log(emotions);
+  } catch (err) {
+    console.error(err);
+  } finally {
+    fs.unlinkSync(FILENAME);
+    console.log("File removed: ", FILENAME);
+  }
 
   // res.send(emotions);
   res.send("helo");

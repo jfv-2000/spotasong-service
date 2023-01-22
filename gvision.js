@@ -55,7 +55,10 @@ export default async function detectEmotions(fileName) {
     
     let output = "{";
     Object.keys(emotions).forEach((emotion, index) => {
-      if ((emotions[emotion] === "VERY_LIKELY" || emotions[emotion] === "LIKELY") && (emotion === "joy" || emotion === "surprise")) {
+      const acceptedLikelihoods = ["VERY_LIKELY", "LIKELY", "POSSIBLE"];
+      const acceptedEmotions = ["joy", "surprise"];
+
+      if (acceptedLikelihoods.includes(emotions[emotion]) && acceptedEmotions.includes(emotion)) {
         output += `"${emotion}": "${emotions[emotion]}",`;
       }
     })
