@@ -14,8 +14,7 @@ app.use(cors());
 const spotifyApi = new SpotifyWebApi({
   clientId: "fbaa4ee2ec994d8ab34f78da26fdfde4",
   clientSecret: "292aa991447f4dfb836531d967b38c0c",
-  redirectUri:
-    "https://63cd552c09b170338192d818--magenta-tarsier-db0bea.netlify.app/",
+  redirectUri: "https://magenta-tarsier-db0bea.netlify.app/",
   // redirectUri: "http://localhost:3000/callback",
 });
 const state = "some-state-of-my-choice";
