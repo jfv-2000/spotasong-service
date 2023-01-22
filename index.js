@@ -162,7 +162,7 @@ app.get("/getRecByPlaylist/:playlistId", async (req, res) => {
         );
     }
     allRecs = allRecs.filter((val) => !allTracks.includes(val));
-    res.json(allRecs);
+    res.json({ allRecs });
   });
 });
 
