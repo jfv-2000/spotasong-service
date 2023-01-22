@@ -90,7 +90,11 @@ app.get("/getUserPlaylists", async (req, res) => {
   spotifyApi.getUserPlaylists(user).then(
     function (data) {
       console.log("Retrieved playlists", data.body);
-      res.send(data.body);
+      const myPlaylists = data.body.items.filter(
+        (item) => item.owner.id === user
+      );
+      console.log("own playlists", myPlaylists);
+      res.send(myPlaylists);
     },
     function (err) {
       console.log("Something went wrong!", err);
