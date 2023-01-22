@@ -53,10 +53,6 @@ app.get("/callback", async (req, res) => {
   // Retrieve an access token and a refresh token
   spotifyApi.authorizationCodeGrant(code).then(
     function (data) {
-      console.log("The token expires in " + data.body["expires_in"]);
-      console.log("The access token is " + data.body["access_token"]);
-      console.log("The refresh token is " + data.body["refresh_token"]);
-
       // Set the access token on the API object to use it in later calls
       spotifyApi.setAccessToken(data.body["access_token"]);
       spotifyApi.setRefreshToken(data.body["refresh_token"]);
@@ -72,7 +68,6 @@ app.get("/callback", async (req, res) => {
 app.get("/getUserDetails", (req, res) => {
   spotifyApi.getMe().then(
     function (data) {
-      console.log("Some information about the authenticated user", data.body);
       res.send(data.body);
     },
     function (err) {
@@ -93,11 +88,9 @@ app.get("/getUserPlaylists", async (req, res) => {
   );
   spotifyApi.getUserPlaylists(user).then(
     function (data) {
-      console.log("Retrieved playlists", data.body);
       const myPlaylists = data.body.items.filter(
         (item) => item.owner.id === user
       );
-      console.log("own playlists", myPlaylists);
       res.send(myPlaylists);
     },
     function (err) {
@@ -107,8 +100,6 @@ app.get("/getUserPlaylists", async (req, res) => {
 });
 
 app.get("/addToPlaylist/:playlistId/:trackId", async (req, res) => {
-  console.log("code add playlist: ", code);
-
   spotifyApi.addTracksToPlaylist(req.params.playlistId, [`${trackId}`]).then(
     function (data) {
       console.log("Added tracks to playlist!");
@@ -183,7 +174,6 @@ app.get("/getPlaylistTracks/:playlistId", async (req, res) => {
           // data containing 5 tracks
           async function (data) {
             allTracks = allTracks.concat(data.body.items);
-            console.log(allTracks.length);
           },
           function (err) {
             console.log("Something went wrong!", err);
@@ -198,7 +188,6 @@ app.get("/getTop100", async (req, res) => {
   /* Get a User’s Top Tracks*/
   let topTracks = [];
   for (let i = 0; i < 2; i++) {
-    console.log("i: ", i);
     await spotifyApi
       .getMyTopTracks({
         offset: i * 49,
